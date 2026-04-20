@@ -82,7 +82,7 @@
       loadIndex++;
 
       var item = document.createElement('div');
-      item.className = 'gallery-item';
+      item.className = 'gallery-item' + (Math.random() < 0.15 ? ' featured' : '');
       item.setAttribute('role', 'button');
       item.setAttribute('tabindex', '0');
       item.setAttribute('aria-label', 'View image');
