@@ -71,21 +71,45 @@
 
     var fragment = document.createDocumentFragment();
     var loaded = 0;
-    var batchCount = Math.min(BATCH_SIZE, shuffled.length - loadIndex);
 
-    if (batchCount <= 0) {
-      // All images shown — reshuffle for another round
+    if (loadIndex >= shuffled.length) {
       shuffled = shuffle(allImages);
       loadIndex = 0;
-      batchCount = Math.min(BATCH_SIZE, shuffled.length);
     }
 
-    for (var i = 0; i < batchCount; i++) {
-      var src = shuffled[loadIndex];
+    // Build batch, then pad to fill the last row
+    var items = [];
+    var regularCount = 0;
+    var count = Math.min(BATCH_SIZE, shuffled.length - loadIndex);
+
+    for (var i = 0; i < count; i++) {
+      var isFeatured = Math.random() < 0.15;
+      items.push({ src: shuffled[loadIndex], featured: isFeatured });
+      if (!isFeatured) regularCount++;
       loadIndex++;
+    }
+
+    // Pad with regular items so regularCount is a multiple of 3
+    var remainder = regularCount % 3;
+    if (remainder !== 0) {
+      var pad = 3 - remainder;
+      for (var p = 0; p < pad; p++) {
+        if (loadIndex >= shuffled.length) {
+          shuffled = shuffle(allImages);
+          loadIndex = 0;
+        }
+        items.push({ src: shuffled[loadIndex], featured: false });
+        loadIndex++;
+      }
+    }
+
+    var batchCount = items.length;
+
+    for (var i = 0; i < batchCount; i++) {
+      var src = items[i].src;
 
       var item = document.createElement('div');
-      item.className = 'gallery-item' + (Math.random() < 0.15 ? ' featured' : '');
+      item.className = 'gallery-item' + (items[i].featured ? ' featured' : '');
       item.setAttribute('role', 'button');
       item.setAttribute('tabindex', '0');
       item.setAttribute('aria-label', 'View image');
