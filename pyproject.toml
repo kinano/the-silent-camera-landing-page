@@ -1,0 +1,17 @@
+[project]
+name = "the-silent-camera-landing-page"
+version = "0.1.0"
+description = "The Silent Camera — photography showcase"
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["scripts"]
+
+[project.scripts]
+generate-manifest = "scripts.generate_manifest:main"
+serve = "scripts.serve:main"
