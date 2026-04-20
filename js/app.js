@@ -1,15 +1,9 @@
 (function () {
   'use strict';
 
-  // --- Config ---
-  var BATCH_SIZE = 6;
-  var SCROLL_THRESHOLD = 400;
-
   // --- State ---
   var allImages = [];
   var shuffled = [];
-  var loadIndex = 0;
-  var loading = false;
   var lightboxIndex = 0;
   var touchStartX = 0;
   var touchEndX = 0;
@@ -46,9 +40,7 @@
       .then(function (images) {
         allImages = images;
         shuffled = shuffle(allImages);
-        loadIndex = 0;
-        loadBatch();
-        setupScroll();
+        renderAll();
       })
       .catch(function () {
         loader.hidden = true;
@@ -58,28 +50,21 @@
       });
   }
 
-  // --- Render a batch of images ---
-  function loadBatch() {
+  // --- Render all images at once ---
+  function renderAll() {
     if (allImages.length === 0) {
       loader.hidden = true;
       return;
     }
 
-    loading = true;
     loader.hidden = false;
 
     var fragment = document.createDocumentFragment();
-    var loaded = 0;
-    var batchCount = Math.min(BATCH_SIZE, allImages.length);
+    var totalLoaded = 0;
+    var total = shuffled.length;
 
-    for (var i = 0; i < batchCount; i++) {
-      if (loadIndex >= shuffled.length) {
-        shuffled = shuffle(allImages);
-        loadIndex = 0;
-      }
-
-      var src = shuffled[loadIndex];
-      loadIndex++;
+    for (var i = 0; i < total; i++) {
+      var src = shuffled[i];
 
       var item = document.createElement('div');
       item.className = 'gallery-item' + (Math.random() < 0.15 ? ' featured' : '');
@@ -96,17 +81,15 @@
       (function (imgEl) {
         imgEl.addEventListener('load', function () {
           imgEl.classList.add('loaded');
-          loaded++;
-          if (loaded >= batchCount) {
-            loading = false;
+          totalLoaded++;
+          if (totalLoaded >= total) {
             loader.hidden = true;
           }
         });
         imgEl.addEventListener('error', function () {
           imgEl.parentElement.style.display = 'none';
-          loaded++;
-          if (loaded >= batchCount) {
-            loading = false;
+          totalLoaded++;
+          if (totalLoaded >= total) {
             loader.hidden = true;
           }
         });
@@ -130,18 +113,6 @@
     }
 
     gallery.appendChild(fragment);
-  }
-
-  // --- Infinite scroll ---
-  function setupScroll() {
-    window.addEventListener('scroll', function () {
-      if (loading) return;
-      var scrollBottom = window.innerHeight + window.scrollY;
-      var docHeight = document.documentElement.scrollHeight;
-      if (docHeight - scrollBottom < SCROLL_THRESHOLD) {
-        loadBatch();
-      }
-    }, { passive: true });
   }
 
   // --- Lightbox ---
