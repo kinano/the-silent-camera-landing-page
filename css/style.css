@@ -379,6 +379,16 @@ main {
   color: var(--charcoal);
 }
 
+.footer-text a {
+  color: var(--charcoal);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-text a:hover {
+  color: var(--gold);
+}
+
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1024px) {
