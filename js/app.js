@@ -2,8 +2,7 @@
   'use strict';
 
   // --- Config ---
-  var BATCH_SIZE = 6;
-  var SCROLL_THRESHOLD = 400;
+  var BATCH_SIZE = 12;
 
   // --- State ---
   var allImages = [];
@@ -17,6 +16,7 @@
   // --- DOM ---
   var gallery = document.getElementById('gallery');
   var loader = document.getElementById('loader');
+  var loadMoreBtn = document.getElementById('load-more');
   var lightbox = document.getElementById('lightbox');
   var lightboxImage = document.getElementById('lightbox-image');
   var lightboxClose = document.getElementById('lightbox-close');
@@ -48,7 +48,6 @@
         shuffled = shuffle(allImages);
         loadIndex = 0;
         loadBatch();
-        setupScroll();
       })
       .catch(function () {
         loader.hidden = true;
@@ -62,22 +61,26 @@
   function loadBatch() {
     if (allImages.length === 0) {
       loader.hidden = true;
+      loadMoreBtn.hidden = true;
       return;
     }
 
     loading = true;
     loader.hidden = false;
+    loadMoreBtn.hidden = true;
 
     var fragment = document.createDocumentFragment();
     var loaded = 0;
-    var batchCount = Math.min(BATCH_SIZE, allImages.length);
+    var batchCount = Math.min(BATCH_SIZE, shuffled.length - loadIndex);
+
+    if (batchCount <= 0) {
+      // All images shown — reshuffle for another round
+      shuffled = shuffle(allImages);
+      loadIndex = 0;
+      batchCount = Math.min(BATCH_SIZE, shuffled.length);
+    }
 
     for (var i = 0; i < batchCount; i++) {
-      if (loadIndex >= shuffled.length) {
-        shuffled = shuffle(allImages);
-        loadIndex = 0;
-      }
-
       var src = shuffled[loadIndex];
       loadIndex++;
 
@@ -100,6 +103,7 @@
           if (loaded >= batchCount) {
             loading = false;
             loader.hidden = true;
+            loadMoreBtn.hidden = false;
           }
         });
         imgEl.addEventListener('error', function () {
@@ -108,6 +112,7 @@
           if (loaded >= batchCount) {
             loading = false;
             loader.hidden = true;
+            loadMoreBtn.hidden = false;
           }
         });
       })(img);
@@ -132,17 +137,12 @@
     gallery.appendChild(fragment);
   }
 
-  // --- Infinite scroll ---
-  function setupScroll() {
-    window.addEventListener('scroll', function () {
-      if (loading) return;
-      var scrollBottom = window.innerHeight + window.scrollY;
-      var docHeight = document.documentElement.scrollHeight;
-      if (docHeight - scrollBottom < SCROLL_THRESHOLD) {
-        loadBatch();
-      }
-    }, { passive: true });
-  }
+  // --- Load More button ---
+  loadMoreBtn.addEventListener('click', function () {
+    if (!loading) {
+      loadBatch();
+    }
+  });
 
   // --- Lightbox ---
   function getAllSources() {
