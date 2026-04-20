@@ -7,7 +7,7 @@ IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.avif', '.gif', '.svg', '
 EXCLUDE_DIRS = {'thumbs', 'dynamic'}
 
 
-def find_images(images_dir: Path) -> list[dict[str, str]]:
+def find_images(images_dir: Path) -> list[str]:
     entries = []
 
     for path in sorted(images_dir.rglob('*')):
@@ -19,17 +19,7 @@ def find_images(images_dir: Path) -> list[dict[str, str]]:
         if any(part in EXCLUDE_DIRS for part in path.relative_to(images_dir).parts):
             continue
 
-        rel_full = str(path.relative_to(images_dir.parent))
-
-        # Look for a matching thumbnail
-        thumb_name = f"thumbs_{path.name.lower()}"
-        thumb_path = path.parent / 'thumbs' / thumb_name
-        if thumb_path.is_file():
-            rel_thumb = str(thumb_path.relative_to(images_dir.parent))
-        else:
-            rel_thumb = rel_full
-
-        entries.append({'thumb': rel_thumb, 'full': rel_full})
+        entries.append(str(path.relative_to(images_dir.parent)))
 
     return entries
 

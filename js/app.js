@@ -6,7 +6,6 @@
   var SCROLL_THRESHOLD = 400;
 
   // --- State ---
-  // Each entry: {thumb: "...", full: "..."} or a plain string (backwards compat)
   var allImages = [];
   var shuffled = [];
   var loadIndex = 0;
@@ -24,15 +23,6 @@
   var lightboxPrev = document.getElementById('lightbox-prev');
   var lightboxNext = document.getElementById('lightbox-next');
   var lightboxCounter = document.getElementById('lightbox-counter');
-
-  // --- Helpers ---
-  function getThumb(entry) {
-    return typeof entry === 'string' ? entry : entry.thumb;
-  }
-
-  function getFull(entry) {
-    return typeof entry === 'string' ? entry : entry.full;
-  }
 
   // --- Shuffle (Fisher-Yates) ---
   function shuffle(arr) {
@@ -83,17 +73,13 @@
     var batchCount = Math.min(BATCH_SIZE, allImages.length);
 
     for (var i = 0; i < batchCount; i++) {
-      // Wrap around when we run out of shuffled images
       if (loadIndex >= shuffled.length) {
         shuffled = shuffle(allImages);
         loadIndex = 0;
       }
 
-      var entry = shuffled[loadIndex];
+      var src = shuffled[loadIndex];
       loadIndex++;
-
-      var thumbSrc = getThumb(entry);
-      var fullSrc = getFull(entry);
 
       var item = document.createElement('div');
       item.className = 'gallery-item';
@@ -102,7 +88,7 @@
       item.setAttribute('aria-label', 'View image');
 
       var img = document.createElement('img');
-      img.src = thumbSrc;
+      img.src = src;
       img.alt = '';
       img.loading = 'lazy';
       img.decoding = 'async';
@@ -126,23 +112,21 @@
         });
       })(img);
 
-      // Store the full-size source for lightbox
-      item.dataset.full = fullSrc;
+      item.dataset.src = src;
       item.appendChild(img);
       fragment.appendChild(item);
 
-      // Click / keyboard open lightbox
-      (function (full) {
+      (function (source) {
         item.addEventListener('click', function () {
-          openLightbox(full);
+          openLightbox(source);
         });
         item.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            openLightbox(full);
+            openLightbox(source);
           }
         });
-      })(fullSrc);
+      })(src);
     }
 
     gallery.appendChild(fragment);
@@ -161,26 +145,25 @@
   }
 
   // --- Lightbox ---
-  function getAllFullSources() {
+  function getAllSources() {
     var items = gallery.querySelectorAll('.gallery-item');
     var sources = [];
     for (var i = 0; i < items.length; i++) {
       if (items[i].querySelector('img.loaded')) {
-        sources.push(items[i].dataset.full);
+        sources.push(items[i].dataset.src);
       }
     }
     return sources;
   }
 
-  function openLightbox(fullSrc) {
-    var sources = getAllFullSources();
-    lightboxIndex = sources.indexOf(fullSrc);
+  function openLightbox(src) {
+    var sources = getAllSources();
+    lightboxIndex = sources.indexOf(src);
     if (lightboxIndex === -1) lightboxIndex = 0;
 
     lightbox.hidden = false;
     document.body.style.overflow = 'hidden';
 
-    // Force reflow then animate
     void lightbox.offsetWidth;
     lightbox.classList.add('active');
 
@@ -211,7 +194,7 @@
   }
 
   function navigateLightbox(dir) {
-    var sources = getAllFullSources();
+    var sources = getAllSources();
     if (sources.length === 0) return;
     lightboxIndex = (lightboxIndex + dir + sources.length) % sources.length;
     showLightboxImage(sources[lightboxIndex]);
@@ -231,14 +214,12 @@
     navigateLightbox(1);
   });
 
-  // Click backdrop to close
   lightbox.addEventListener('click', function (e) {
     if (e.target === lightbox || e.target.classList.contains('lightbox-image-wrap')) {
       closeLightbox();
     }
   });
 
-  // Keyboard navigation
   document.addEventListener('keydown', function (e) {
     if (lightbox.hidden) return;
 
@@ -255,7 +236,6 @@
     }
   });
 
-  // Touch/swipe for mobile lightbox
   lightbox.addEventListener('touchstart', function (e) {
     touchStartX = e.changedTouches[0].screenX;
   }, { passive: true });
