@@ -48,7 +48,16 @@
     </div>
   </section>
 
+  <section class="videos-section" id="videos-section">
+    <div class="videos-inner">
+      <h2 class="section-heading">Films</h2>
+      <div class="video-grid" id="video-grid"></div>
+      <a class="videos-all-link" href="https://www.youtube.com/@Thesilentcamera/videos" target="_blank" rel="noopener noreferrer">View all films on YouTube</a>
+    </div>
+  </section>
+
   <main>
+    <h2 class="section-heading stills-heading">Stills</h2>
     <div class="gallery" id="gallery"></div>
     <div class="loader" id="loader" aria-hidden="true">
       <div class="loader-ring"></div>
@@ -75,6 +84,7 @@
 
   <script>document.getElementById('current-year').textContent = new Date().getFullYear();</script>
 
+  <script src="js/videos.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
