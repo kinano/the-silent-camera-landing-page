@@ -77,3 +77,7 @@ The HTML/CSS/JS is served as-is. There is no transpilation, minification, or bun
 1. If you touched anything in `images/`, run `uv run generate-manifest` and include the updated `images.json`.
 2. Verify `images.json` is valid: `python3 -c "import json; json.load(open('images.json'))"`.
 3. Do not commit `.DS_Store`, `.venv/`, or `__pycache__/` (already in `.gitignore`).
+
+## Committing rules on this repo
+
+This is a solo project repo that does not require PRs or reviews from other humans or other agents. It is okay to merge to main.
