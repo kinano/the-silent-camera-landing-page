@@ -2,6 +2,8 @@
   'use strict';
 
   var VIDEO_COUNT = 3;
+  var allVideos = [];
+  var offset = 0;
 
   function shuffle(arr) {
     var a = arr.slice();
@@ -21,12 +23,27 @@
         return res.json();
       })
       .then(function (videos) {
-        var picked = shuffle(videos).slice(0, VIDEO_COUNT);
-        render(picked);
+        allVideos = shuffle(videos);
+        loadMore();
+        var btn = document.getElementById('videos-more-btn');
+        if (btn) {
+          btn.addEventListener('click', loadMore);
+        }
       })
       .catch(function () {
         document.getElementById('videos-section').hidden = true;
       });
+  }
+
+  function loadMore() {
+    var batch = allVideos.slice(offset, offset + VIDEO_COUNT);
+    if (batch.length === 0) return;
+    render(batch);
+    offset += batch.length;
+    var btn = document.getElementById('videos-more-btn');
+    if (btn && offset >= allVideos.length) {
+      btn.hidden = true;
+    }
   }
 
   function render(videos) {
