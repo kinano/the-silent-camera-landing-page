@@ -161,7 +161,7 @@
     gallery.appendChild(fragment);
   }
 
-  // --- Load More button ---
+  // --- More of the same button ---
   loadMoreBtn.addEventListener('click', function () {
     if (!loading) {
       loadBatch();
